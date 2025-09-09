@@ -1,5 +1,5 @@
-const BASE_URL = "http://localhost:4000";
-
+// const BASE_URL = "http://localhost:4000";
+const BASE_URL = process.env.BASE_URL;
 export async function apiPost(path, body, token) {
   const res = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
