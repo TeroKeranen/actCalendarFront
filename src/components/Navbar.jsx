@@ -10,8 +10,8 @@ const Navbar = () => {
                 <div className="navbar-start">
 
                     {/* title*/}
-                    <NavLink to="/" className="hidden lg:flex btn btn-primary text-3xl items-center">
-                        C
+                    <NavLink to="/app" className="hidden lg:flex btn btn-primary text-3xl items-center">
+                        LOGO
                     </NavLink>
 
                     {/* {DROPDOWN} */}

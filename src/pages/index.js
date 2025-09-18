@@ -9,3 +9,5 @@ export {default as Welcome} from './Welcome';
 export {default as Error} from './Error';
 export {default as Landing} from './Landing';
 export {default as CreatedCalendars} from './createdCalendars';
+export {default as RootLayout} from './rootLayout';
+export {default as ActAdminpage} from './ActAdminPage';

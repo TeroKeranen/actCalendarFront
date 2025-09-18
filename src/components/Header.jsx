@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom"
 import { logoutUser } from "../features/user/userSlice";
+import { clearTenant } from "../features/tenant/tenantSlice";
 
 
 
@@ -9,11 +10,12 @@ const Header = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector((state) => state.userState.user);
-    console.log("header", user);
+   
 
     const handleLogout = () => {
         navigate('/');
         dispatch(logoutUser());
+        dispatch(clearTenant());
     }
 
     return (
@@ -26,6 +28,9 @@ const Header = () => {
                     <button className="btn btn-xs btn-outline btn-primary" onClick={handleLogout}>logout</button>
                 </div>) : (
                 <div className="flex gap-x-6 justify-center items-center">
+                    <Link to="/" className="link link-hover text-xs sm:text-sm">
+                        Etusivu
+                    </Link>
                     <Link to='/signin' className="link link-hover text-xs sm:text-sm">
                         Sign in
                     </Link>

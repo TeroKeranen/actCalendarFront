@@ -7,10 +7,10 @@ const Navlinks = () => {
     
 
     const Links = [
-        {id: 1, url: 'welcome', text: 'welcome'},
-        {id: 2, url: 'createcardholder', text: 'Luo henkilö'},
-        {id: 3, url: 'calendarcreate', text: 'Luo kalenteri'},
-        {id: 4, url: 'calendars', text: 'Kalenterit'},
+        {id: 1, url: 'createcardholder', text: 'Luo henkilö'},
+        {id: 2, url: 'calendarcreate', text: 'Luo kalenteri'},
+        {id: 3, url: 'calendars', text: 'Kalenterit'},
+        {id: 4, url: 'actadmin', text: 'actadmin'},
         // {id: 2, url: 'calendarSetup', text: 'cal setup'},
       
 

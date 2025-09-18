@@ -31,38 +31,7 @@ export const action = async ({request}) => {
 export default function Signup() {
 
   const [role, setRole] = useState("asentaja"); // oletuksena asentaja
-  // const nav = useNavigate();
-  // const [form, setForm] = useState({
-  //   email: "",
-  //   password: "",
-  //   role: "asiakas",      // "asiakas" | "asentaja"
-  //   tenantName: "",       // vain asiakas
-  //   tenantSlug: "",       // vain asiakas (valinnainen)
-  // });
-  // const [err, setErr] = useState("");
-  // const [loading, setLoading] = useState(false);
 
-  // const submit = async (e) => {
-  //   e.preventDefault();
-  //   setErr("");
-  //   setLoading(true);
-  //   try {
-  //     // Lähetetään tenantName/tenantSlug mukaan – backend luo/valitsee tenantin ja palauttaa tenantId
-  //     await signUp({
-  //       email: form.email,
-  //       password: form.password,
-  //       role: form.role,
-  //       tenantName: form.role === "asiakas" ? form.tenantName : undefined,
-  //       tenantSlug: form.role === "asiakas" ? form.tenantSlug : undefined,
-  //     });
-  //     nav("/welcome");
-  //   } catch (e) {
-  //     // Näytä palvelimen virhe jos saatavilla
-  //     setErr(e?.message || "Rekisteröinti epäonnistui");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <section className="h-screen grid place-items-center">

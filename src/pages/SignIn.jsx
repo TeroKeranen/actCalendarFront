@@ -4,6 +4,7 @@ import { signIn } from "../lib/auth";
 import { FormInput, SubmitBtn } from "../components";
 import {Form, Link, redirect, useNavigate} from 'react-router-dom'
 import { loginUser } from "../features/user/userSlice";
+import { bootstrapTenant } from "../features/tenant/tenantSlice";
 
 export const action = (store) => async ({request}) => {
   
@@ -15,12 +16,18 @@ export const action = (store) => async ({request}) => {
     // const email = formData.get("email");
     // const password = formData.get("password");
     
-   
-
     const user = await signIn({email: data.email, password: data.password})
-    console.log("usseeer",user);
     store.dispatch(loginUser(user))
-    return redirect('/welcome');
+
+    // Esilataa kaikki data kalenteria varten
+    await store.dispatch(
+      bootstrapTenant({ tenantId: user.tenantId, token: user.token })
+    ).unwrap();
+
+    const url = new URL(request.url);
+    const redirectTo = url.searchParams.get('redirectTo') || '/app';
+    return redirect(redirectTo);
+
   } catch (error) {
     return JSON(
       {error: error.message || "Kirjautuminen epäonnistui"},
@@ -54,8 +61,8 @@ export default function Signing() {
     <section className="h-screen grid place-items-center">
       <Form method='post' className="card w-96 p-8 bg-base-100 shadow-lg flex flex-col gap-y-4">
         <h4 className="text-center text-3xl font-bold">Login</h4>
-      <FormInput type="email" label="email" name="email" defaultValue='test@test.fi'/>
-      <FormInput type="password" label="password" name="password" defaultValue='secret'/>
+      <FormInput type="email" label="email" name="email" defaultValue=''/>
+      <FormInput type="password" label="password" name="password" defaultValue=''/>
       <div className="mt-4">
         <SubmitBtn text="login" />
         
@@ -67,31 +74,6 @@ export default function Signing() {
 
       </Form>
     </section>
-    // <div style={{ maxWidth: 420, margin: "40px auto" }}>
-    //   <h2>Sign in</h2>
-    //   <form onSubmit={submit}>
-    //     <input
-    //       type="email"
-    //       placeholder="Sähköposti"
-    //       value={form.email}
-    //       onChange={(e) => setForm({ ...form, email: e.target.value })}
-    //       required
-    //     />
-    //     <br />
-    //     <input
-    //       type="password"
-    //       placeholder="Salasana"
-    //       value={form.password}
-    //       onChange={(e) => setForm({ ...form, password: e.target.value })}
-    //       required
-    //     />
-    //     <br />
-    //     <button type="submit" disabled={loading}>{loading ? "Kirjaudutaan..." : "Kirjaudu"}</button>
-    //   </form>
-    //   {err && <p style={{ color: "red" }}>{err}</p>}
-    //   <p>
-    //     Ei vielä tiliä? <Link to="/signup">Sign up</Link>
-    //   </p>
-    // </div>
+
   );
 }

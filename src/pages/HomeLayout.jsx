@@ -1,11 +1,21 @@
 
-import { Outlet } from "react-router-dom";
+import { Outlet, redirect, Navigate} from "react-router-dom";
 import {Header, NavBar} from '../components';
+import { getUser } from "../lib/auth";
+
 
 const HomeLayout = () => {
+
+
+    const auth = getUser() ?? {};
+    const loggedIn = Boolean(auth?.tenantId && auth?.token);
+  
+    if (!loggedIn) return <Navigate to="/signin" replace />;
+
+
     return <>
     
-    <Header />
+    {/* <Header /> */}
     <NavBar />
 
     <section className="align-element py-20">

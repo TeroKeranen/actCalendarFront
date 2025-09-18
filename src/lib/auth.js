@@ -13,6 +13,15 @@ export function clearUser() {
   localStorage.removeItem(KEY);
 }
 
+export async function requireAuth({ request }) {
+  const user = getUser();
+  if (!user?.tenantId || !user?.token) {
+    const url = new URL(request.url);
+    throw redirect(`/signin?redirectTo=${encodeURIComponent(url.pathname + url.search)}`);
+  }
+  return null;
+}
+
 export async function signUp({ email, password, role, tenantName, tenantSlug }) {
     const data = await apiPost("/api/auth/signup", { email, password, role, tenantName, tenantSlug });
     if (!data?.ok) throw new Error(data?.error || "Signup failed");
