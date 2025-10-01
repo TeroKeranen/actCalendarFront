@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getPublicCalendar, publicBook, getPublicAvailability } from "../lib/api";
+import { BookingSuccess } from "../components";
 
 function pad2(n) { return String(n).padStart(2, "0"); }
 function parseHHMM(s = "00:00") {
@@ -30,6 +31,11 @@ export default function PublicCalendar() {
   const [pickedIdx, setPickedIdx] = useState(-1);
 
   const [taken, setTaken] = useState([]); // Jo varattuja kalenteri aikoja varten
+
+  // 
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successPin, setSuccessPin] = useState(undefined);
+  const [successWhen, setSuccessWhen] = useState("");
 
   // Hae kalenteri
   useEffect(() => {
@@ -139,32 +145,45 @@ const slots = useMemo(() => {
       setMsg("Anna etunimi ja sukunimi");
       return;
     }
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    if (!emailOk) {
+      setMsg("Anna kelvollinen sähköpostiosoite");
+      return;
+    }
+
     if (!date || !start || !end) {
       setMsg("Valitse päivä ja kellonaika listasta");
       return;
     }
     try {
       setSubmitting(true);
+  
       const r = await publicBook(slug, {
         forename: forename.trim(),
         surname: surname.trim(),
         date,
         start,
         end,
-        email: email || undefined,
+        email: email.trim(),
       });
-      const pin = r?.booking?.accessCode;
-      setMsg(pin ? `Varaus OK. PIN: ${pin}` : "Varaus OK.");
+  
+      const pin = r && r.booking ? r.booking.accessCode : undefined;
+  
+      // Päivitä varatut slotit heti näkyviin
       try {
         const a = await getPublicAvailability(slug, date);
-        setTaken(a.taken || [])
-      } catch (error) {
-        
-      }
-      // Tyhjennä valinta halutessasi:
-      // setPickedIdx(-1); setStart(""); setEnd("");
+        setTaken(a.taken || []);
+      } catch (_) {}
+  
+      const whenText = `${date} ${start}–${end}`;
+      setSuccessPin(pin);
+      setSuccessWhen(whenText);
+      setSuccessOpen(true);
+  
+      setMsg(`Varaus OK. PIN on lähetetty sähköpostiisi (${email.trim()}).`);
     } catch (e) {
-      setMsg(e?.message || "Varaus epäonnistui");
+      setMsg((e && e.message) || "Varaus epäonnistui");
     } finally {
       setSubmitting(false);
     }
@@ -284,6 +303,16 @@ const slots = useMemo(() => {
           {msg}
         </p>
       )}
+
+      <BookingSuccess
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        pin={successPin}
+        email={email}
+        whenText={successWhen}
+        title={cal && cal.title}
+        doorName={cal && cal.doorName}
+      />
     </div>
   );
 }

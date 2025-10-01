@@ -1,5 +1,5 @@
-const BASE_URL = "http://localhost:4000";
-// const BASE_URL = "https://actbackend-23f7fc138015.herokuapp.com"
+// const BASE_URL = "http://localhost:4000";
+const BASE_URL = "https://actbackend-23f7fc138015.herokuapp.com"
 
 export async function apiPost(path, body, token) {
   const res = await fetch(`${BASE_URL}${path}`, {
