@@ -1,62 +1,78 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { signIn } from "../lib/auth";
 import { FormInput, SubmitBtn } from "../components";
-import {Form, Link, redirect, useNavigate} from 'react-router-dom'
+import {Form, Link, redirect, useActionData, useNavigate, useNavigation} from 'react-router-dom'
 import { loginUser } from "../features/user/userSlice";
 import { bootstrapTenant } from "../features/tenant/tenantSlice";
+import { toast } from "react-toastify";
 
 export const action = (store) => async ({request}) => {
   
     const formData = await request.formData();
     const data = Object.fromEntries(formData);
-  try {
-    // console.log("formdata", formData)
 
-    // const email = formData.get("email");
-    // const password = formData.get("password");
+  try {
+
     
     const user = await signIn({email: data.email, password: data.password})
     store.dispatch(loginUser(user))
 
-    // Esilataa kaikki data kalenteria varten
-    await store.dispatch(
-      bootstrapTenant({ tenantId: user.tenantId, token: user.token })
-    ).unwrap();
+
+    try {
+      // Esilataa kaikki data kalenteria varten
+      await store.dispatch(
+        bootstrapTenant({ tenantId: user.tenantId, token: user.token })
+      ).unwrap();
+      
+    } catch (e) {
+      console.log("BootsrapTenant skipped: ", e?.message || e)
+    }
+
 
     const url = new URL(request.url);
     const redirectTo = url.searchParams.get('redirectTo') || '/app';
     return redirect(redirectTo);
 
-  } catch (error) {
-    return JSON(
-      {error: error.message || "Kirjautuminen epäonnistui"},
-      {status: 400}
-    )
+  } catch (e) {
+    return {ok: false, error: e?.message || "Jotain meni vikaan"}
     
   }
 }
 
 export default function Signing() {
   const nav = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [err, setErr] = useState("");
-  const [loading, setLoading] = useState(false);
+  const actionData = useActionData();
+  const navigation = useNavigation();
 
-  const submit = async (e) => {
-    e.preventDefault();
-    setErr("");
-    setLoading(true);
-    try {
-      await signIn(form);
-      nav("/welcome");
-    } catch (e) {
-      setErr(e?.message || "Kirjautuminen epäonnistui");
-    } finally {
-      setLoading(false);
+  const isSubmitting = navigation.state === "submitting";
+
+
+
+  useEffect(() => {
+    if (!actionData) return;
+
+    if (actionData.ok) {
+      toast.success("Kirjautuminen onnistui");
+
+    } else if (actionData.error) {
+      toast.error("Jotain meni vikaan");
     }
-  };
+  })
+
+
   return (
+    <div>
+
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/30">
+          <div className="bg-base-100 rounded-xl shadow-xl px-6 py-4 flex items-center gap-3">
+            <span className="loading loading-spinner loading-md" />
+            <span>Lähetetään tietoja…</span>
+          </div>
+        </div>
+      )}
+
 
     <section className="h-screen grid place-items-center">
       <Form method='post' className="card w-96 p-8 bg-base-100 shadow-lg flex flex-col gap-y-4">
@@ -75,5 +91,6 @@ export default function Signing() {
       </Form>
     </section>
 
+    </div>
   );
 }

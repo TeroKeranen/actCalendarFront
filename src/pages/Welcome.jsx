@@ -1,12 +1,22 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link, Form } from "react-router-dom";
+import { useNavigate, Link, Form, useActionData, useNavigation } from "react-router-dom";
 import { getUser, clearUser, ensureTenantInAuth } from "../lib/auth";
 import { linkActAll, pingTenant } from "../lib/api";
 import { FormInput, SubmitBtn } from "../components";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { bootstrapTenant } from "../features/tenant/tenantSlice";
 
 export const action = async ({request}) => {
 
+  const auth = getUser();
+
+  
+  if (!auth.tenantId || !auth?.token) {
+    toast.error("Ei kirjautunutta tenanttia");
+    return JSON({ok: false, error: "No tenant"}, {status: 401})
+
+  }
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
 
@@ -18,28 +28,38 @@ export const action = async ({request}) => {
 
 
 
-  const auth = getUser();
-
-  
-  if (!auth.tenantId || !auth?.token) {
-    toast.error("Ei kirjautunutta tenanttia");
-    return JSON({ok: false, error: "No tenant"}, {status: 401})
-
-  }
   
   if (!actCustomerId || !username || !password) {
-    return JSON({ok: false, error: "täytä kaikki kentätä"}, {status: 400})
+    return { ok: false, error: "Täytä kaikki kentät" };
   }
 
-  const response = await linkActAll(auth.tenantId, { actCustomerId, username, password }, auth.token);
-
-  console.log("Response welcome", response);
+  try {
+    const resp = await linkActAll(
+      auth.tenantId,
+      { actCustomerId, username, password },
+      auth.token
+    );
+    // Jos haluat logata, loggaa resp eikä "response"
+    // console.log("linkActAll resp", resp);
+    return { ok: true, message: "Linkitys onnistui", payload: resp };
+  } catch (err) {
+    return { ok: false, error: err?.message || "Linkitys epäonnistui" };
+  }
 }
 
 export default function Welcome() {
+  const actionData = useActionData();
+  const nav = useNavigate();
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  const isSubmitting = navigation.state === "submitting";
+
   const [auth, setAuth] = useState(() => getUser()); // { token, role, email, tenantId }
   const [ready, setReady] = useState(false);
-  const nav = useNavigate();
+  const [formKey, setFormKey] = useState(0);
+  
+
 
   useEffect(() => {
     (async () => {
@@ -55,11 +75,23 @@ export default function Welcome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [actCustomerId, setActCustomerId] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState("");
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!actionData) return;
+    if (actionData.ok) {
+      toast.success(actionData.message || "Linkitys onnistui");
+      dispatch(
+        bootstrapTenant({tenantId: auth.tenantId, token:auth.token})
+      ).unwrap().then(() => {
+        toast.success("Act-tiedot haettu")
+      }).catch((e) => {
+        toast.error("Act tietojen haku epäonnistui")
+      })
+      setFormKey((k) => k + 1);
+    } else if (actionData.error) {
+      toast.error("Linkitys epäonnistui");
+    }
+  }, [actionData, dispatch])
+
 
   if (!ready) return null;
 
@@ -75,32 +107,24 @@ export default function Welcome() {
     );
   }
 
-  // const doLinkAll = async () => {
-  //   setMsg("");
-  //   setLoading(true);
-  //   try {
-  //     if (!actCustomerId || !username || !password) {
-  //       throw new Error("Täytä ACT Customer ID, käyttäjätunnus ja salasana.");
-  //     }
-  //     const r = await linkActAll(auth.tenantId, { actCustomerId, username, password }, auth.token);
-  //     setMsg(`OK: linkitetty customer=${r.actCustomerId}. Testataan ping...`);
-  //     const p = await pingTenant(auth.tenantId, auth.token);
-  //     setMsg(`PING OK: ${p.userName}, customer=${p.actCustomerId}, token=${p.token_type}, exp=${p.expires_in}s`);
-  //   } catch (e) {
-  //     setMsg(String(e.message || e));
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+
 
   return (
     <div style={{ padding: 24 }}>
-      <h2>Tervetuloa {auth.email}</h2>
-      <p>Rooli: {auth.role}</p>
+
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/30">
+          <div className="bg-base-100 rounded-xl shadow-xl px-6 py-4 flex items-center gap-3">
+            <span className="loading loading-spinner loading-md" />
+            <span>Lähetetään tietoja…</span>
+          </div>
+        </div>
+      )}
+     
       
 
-      <section className="h-screen grid place-items-center ">
-        <Form method="post" className="card w-96 p-8 bg-base-100 shadow-xl/20 flex flex-col gap-y-4">
+      <section className=" grid place-items-center ">
+        <Form method="post"  key={formKey} className="card w-96 p-8 bg-base-100 shadow-xl/20 flex flex-col gap-y-4">
 
           <h4 className="text-center text-3xl font-bold">Linkitä act365 asiakas</h4>
 
@@ -118,22 +142,6 @@ export default function Welcome() {
         </Form>
 
       </section>
-
-
-
-
-
-      <p style={{ marginTop: 12 }}>
-        <Link to="/act/cardholders/new">Luo cardholder »</Link>
-      </p>
-
-      <p style={{ marginTop: 12 }}>
-        <a href="/calendar/setup">Avaa ovikalenteri »</a>
-      </p>
-
-      <p style={{ marginTop: 12 }}>
-        <Link to="/calendar/new">Luo cardholder2 »</Link>
-      </p>
     </div>
   );
 }

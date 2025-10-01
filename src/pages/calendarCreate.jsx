@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Form, redirect, useActionData, useNavigate, useNavigation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../lib/auth";
 import { listSites, listDoors, listCardholderGroups, createCalendar } from "../lib/api";
 import { FormInput, SubmitBtn } from "../components";
 import { toast } from "react-toastify";
-import { selectSites, selectDoorsForSite, selectGroupsForSite } from "../features/tenant/tenantSlice";
+import { selectSites, makeSelectDoorsForSite, makeSelectGroupsForSite, bootstrapTenant } from "../features/tenant/tenantSlice";
+
+
+
+//// LUO KALENTERI SIVU
 
 
 
@@ -59,13 +63,26 @@ export const action = async ({request}) => {
 
 export default function CalendarCreate() {
 
-
+  const dispatch = useDispatch();
   const auth = getUser();
+
   if (!auth?.token || !auth?.tenantId) {
     return <div style={{ padding: 24 }}>Ei kirjautunutta tenanttia.</div>;
   }
 
-  const tenantStatus = useSelector((s) => s.tenant.status);
+   // Lataa tenantin data tarvittaessa
+   const tenantStatus = useSelector((s) => s.tenant.status);
+
+   useEffect(() => {
+     if (tenantStatus === "idle") {
+       dispatch(bootstrapTenant({ tenantId: auth.tenantId, token: auth.token }));
+     }
+   }, [tenantStatus, dispatch, auth.tenantId, auth.token]);
+
+    // Memoidut selektorit tälle komponentille
+  const selectDoorsForCurrentSite = useMemo(makeSelectDoorsForSite, []);
+  const selectGroupsForCurrentSite = useMemo(makeSelectGroupsForSite, []);
+
   const sites = useSelector(selectSites);
 
   const [form, setForm] = useState({
@@ -76,6 +93,14 @@ export default function CalendarCreate() {
     title: "",
     slotMinutes: 60,
   });
+
+    // // Ovien ja ryhmien listat valitulle sitelle suoraan storesta
+    // const doors  = useSelector((state) => selectDoorsForSite(state, form.siteId));
+    // const groups = useSelector((state) => selectGroupsForSite(state, form.siteId));
+   // Oviet & ryhmät valitulle sitelle
+   const doors = useSelector((state) => selectDoorsForCurrentSite(state, form.siteId));
+   const groups = useSelector((state) => selectGroupsForCurrentSite(state, form.siteId));
+
 
   // Valitse aloitussite: localStoragesta tai jos vain yksi site
   useEffect(() => {
@@ -89,9 +114,7 @@ export default function CalendarCreate() {
     }
   }, [sites, form.siteId]);
 
-  // Ovien ja ryhmien listat valitulle sitelle suoraan storesta
-  const doors  = useSelector((state) => selectDoorsForSite(state, form.siteId));
-  const groups = useSelector((state) => selectGroupsForSite(state, form.siteId));
+
 
   // Kun site vaihtuu, muista valinta ja esivalitse 1. door & group
   useEffect(() => {
@@ -126,8 +149,8 @@ export default function CalendarCreate() {
   }
 
   return (
-    <div style={{ padding: 0 }}>
-      <section className="h-screen grid place-items-center">
+    <div >
+      <section className="grid place-items-center p-10">
         <Form method="post" className="card w-96 p-8 bg-base-100 shadow-xl/20 flex flex-col gap-y-4">
           {/* Piilokentät actionille */}
           <input type="hidden" name="doorName" value={doorName} />

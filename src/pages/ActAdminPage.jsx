@@ -15,6 +15,8 @@ export async function loader() {
     try {
       const data = await apiGet(`/api/tenants/${auth.tenantId}/act/cardholders`, auth.token);
       // hyväksy array tai { items: [...] }
+
+      console.log("Data", data);
       
       const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
       return items;

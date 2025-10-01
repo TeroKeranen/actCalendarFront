@@ -5,7 +5,7 @@ import {FaBarsStaggered} from 'react-icons/fa6'
 
 const Navbar = () => {
     return (
-        <nav className="bg-base-200">
+        <nav className="bg-base-300">
             <div className="navbar align-element">
                 <div className="navbar-start">
 

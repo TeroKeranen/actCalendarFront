@@ -72,6 +72,10 @@ export const linkActCustomer = (tenantId, actCustomerId, token) =>
 export const createCalendar = (tenantId, payload, token) =>
   apiPost(`/api/tenants/${tenantId}/calendars`, payload, token);
 
+//Kalenterien poistaminen
+export const deleteCalendar = (tenantId, idOrSlug, token) => 
+  apiDelete(`/api/tenants/${tenantId}/calendars/${encodeURIComponent(idOrSlug)}`, token);
+
 // Listaa kalenterit (admin)
 export const listCalendars = (tenantId, token) =>
   apiGet(`/api/tenants/${tenantId}/calendars`, token);
@@ -86,3 +90,6 @@ export const publicBook = (slug, payload) =>
 
 export const listDoorGroups = (tenantId, siteId, token) =>
   apiGet(`/api/tenants/${tenantId}/act/door-groups?siteid=${encodeURIComponent(siteId)}`, token);
+
+export const getPublicAvailability = (slug, date) => 
+  apiGet(`/api/calendar/${encodeURIComponent(slug)}/availability?date=${encodeURIComponent(date)}`)

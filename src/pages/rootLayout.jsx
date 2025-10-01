@@ -5,7 +5,7 @@ export default function RootLayout() {
   return (
     <>
       <Header />
-      <section className="align-element py-20">
+      <section className="">
         <Outlet />
       </section>
     </>

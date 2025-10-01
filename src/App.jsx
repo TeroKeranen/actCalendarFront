@@ -6,7 +6,7 @@ import {
   HomeLayout,
   ActCreateCardholder,
   CalendarCreate,
-  CalendarSetup,
+  // CalendarSetup,
   PublicCalendar,
   SignIn,
   SignUp,
@@ -53,7 +53,7 @@ const router = createBrowserRouter([
           { index: true, element: <Welcome />, action: welcomeAction },
           { path: "createcardholder", element: <ActCreateCardholder /> },
           { path: "calendarcreate", element: <CalendarCreate />, action: createcalendar },
-          { path: "calendarsetup", element: <CalendarSetup /> },
+          // { path: "calendarsetup", element: <CalendarSetup /> },
           { path: "calendars", element: <CreatedCalendars />, loader: createdCalendars },
           {path: "actadmin", element: <ActAdminpage />, loader: actAdminLoader}
         ],

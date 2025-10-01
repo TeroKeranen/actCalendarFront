@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, createSelector } from "@reduxjs/toolkit";
 import { listSites, listDoors, listCardholderGroups } from "../../lib/api"
 
 
@@ -24,6 +24,9 @@ const normalizeSites = (resp) => {
                    name: String(g.name ?? g.Name ?? `Group ${g.id ?? g.ID}`)}))
       .filter(x => Number.isFinite(x.id));
   };
+
+  // YKSI vakio tyhjä taulukko -> sama viite aina
+const EMPTY = Object.freeze([]);
 
   // apuri: jaa lista pieniin eriin (vähentää “piikkikuormaa”)
 const chunk = (arr, size) => {
@@ -101,8 +104,23 @@ export const bootstrapTenant = createAsyncThunk(
   export default tenantSlice.reducer;
   
   // --- selektorit ---
-  export const selectSites = (state) => state.tenant.sites;
-  export const selectDoorsForSite = (state, siteId) =>
-    state.tenant.doorsBySiteId[Number(siteId)] || [];
-  export const selectGroupsForSite = (state, siteId) =>
-    state.tenant.groupsBySiteId[Number(siteId)] || [];
+  export const selectSites = (state) => state.tenant.sites || EMPTY;
+
+  // apurit: raaka-mapit
+  const selectDoorsMap = (state) => state.tenant.doorsBySiteId || {};
+  const selectGroupsMap = (state) => state.tenant.groupsBySiteId || {};
+  // parametri (siteId) normalisoituna stringiksi
+  const selectSiteKey = (_state, siteId) => String(siteId ?? "");
+
+  // tehdään SELECTOR FACTORYT (kutsu kerran per komponentti)
+  export const makeSelectDoorsForSite = () =>
+    createSelector([selectDoorsMap, selectSiteKey], (map, key) => map[key] ?? EMPTY);
+
+  export const makeSelectGroupsForSite = () =>
+    createSelector([selectGroupsMap, selectSiteKey], (map, key) => map[key] ?? EMPTY);
+
+  // export const selectDoorsForSite = (state, siteId) =>
+  //   state.tenant.doorsBySiteId[Number(siteId)] || [];
+
+  // export const selectGroupsForSite = (state, siteId) =>
+  //   state.tenant.groupsBySiteId[Number(siteId)] || [];

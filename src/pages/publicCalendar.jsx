@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getPublicCalendar, publicBook } from "../lib/api";
+import { getPublicCalendar, publicBook, getPublicAvailability } from "../lib/api";
 
 function pad2(n) { return String(n).padStart(2, "0"); }
 function parseHHMM(s = "00:00") {
@@ -29,17 +29,53 @@ export default function PublicCalendar() {
   const [submitting, setSubmitting] = useState(false);
   const [pickedIdx, setPickedIdx] = useState(-1);
 
+  const [taken, setTaken] = useState([]); // Jo varattuja kalenteri aikoja varten
+
   // Hae kalenteri
   useEffect(() => {
     (async () => {
       try {
         const r = await getPublicCalendar(slug);
+        
         setCal(r?.calendar || null);
       } catch (e) {
         setMsg(e?.message || "Kalenteria ei löytynyt");
       }
     })();
   }, [slug]);
+
+  useEffect(() => {
+    if (!cal) return;
+    (async () => {
+      try {
+        const r = await getPublicAvailability(slug, date);
+        console.log("VARATUT", r);
+        setTaken(r.taken || []);
+      } catch (error) {
+              // ei kaadeta UI:ta – voidaan näyttää vain varoitus
+      console.warn("Saatavuuden haku epäonnistui", e);
+      setTaken([]);
+        
+      }
+    })();
+  }, [cal, slug, date])
+
+  // apurit: merkkijonot -> minuutit (päivän sisällä)
+function toMinutesLocal(iso) {
+  const d = new Date(iso);
+  return d.getHours()*60 + d.getMinutes();
+}
+
+// Onko slot [s,e] päällekkäinen minkä tahansa taken-intervallin kanssa?
+function slotIsTaken(slot) {
+  const sMin = parseHHMM(slot.s);
+  const eMin = parseHHMM(slot.e);
+  return taken.some(t => {
+    const tS = toMinutesLocal(t.startsAt);
+    const tE = toMinutesLocal(t.endsAt);
+    return sMin < tE && eMin > tS; // overlap
+  });
+}
 
   // Laske päivän slotit
 // korvaa nykyinen useMemo(slots) tällä
@@ -85,6 +121,8 @@ const slots = useMemo(() => {
   return out;
 }, [cal, date]);
 
+
+
   // Slotin valinta täyttää start/end
   const pickSlot = (idx) => {
     setPickedIdx(idx);
@@ -117,6 +155,12 @@ const slots = useMemo(() => {
       });
       const pin = r?.booking?.accessCode;
       setMsg(pin ? `Varaus OK. PIN: ${pin}` : "Varaus OK.");
+      try {
+        const a = await getPublicAvailability(slug, date);
+        setTaken(a.taken || [])
+      } catch (error) {
+        
+      }
       // Tyhjennä valinta halutessasi:
       // setPickedIdx(-1); setStart(""); setEnd("");
     } catch (e) {
@@ -190,14 +234,17 @@ const slots = useMemo(() => {
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {slots.map((slot, idx) => {
                 const active = pickedIdx === idx;
+                const disabled = slotIsTaken(slot);
                 return (
                   <li key={`${slot.s}-${slot.e}`}>
                     <button
                       type="button"
-                      className={`btn btn-sm w-full ${active ? "btn-primary" : ""}`}
-                      onClick={() => pickSlot(idx)}
+                      className={`btn btn-sm w-full ${active ? "btn-primary" : ""} ${disabled ? "btn-disabled opacity-60" : ""}`}
+                      onClick={() => !disabled && pickSlot(idx)}
+                      disabled={disabled}
+                      title={disabled ? "Varattu" : "Vapaa"}
                     >
-                      {slot.s}–{slot.e}
+                       {slot.s}–{slot.e}{disabled ? " (varattu)" : ""}
                     </button>
                   </li>
                 );

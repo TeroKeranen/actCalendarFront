@@ -16,9 +16,12 @@ const HomeLayout = () => {
     return <>
     
     {/* <Header /> */}
-    <NavBar />
+    <section className="">
 
-    <section className="align-element py-20">
+        <NavBar />
+    </section>
+
+    <section className="align-element py-0">
         <Outlet />
     </section>
     </>

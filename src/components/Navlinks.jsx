@@ -7,11 +7,11 @@ const Navlinks = () => {
     
 
     const Links = [
-        {id: 1, url: 'createcardholder', text: 'Luo henkilö'},
-        {id: 2, url: 'calendarcreate', text: 'Luo kalenteri'},
-        {id: 3, url: 'calendars', text: 'Kalenterit'},
-        {id: 4, url: 'actadmin', text: 'actadmin'},
-        // {id: 2, url: 'calendarSetup', text: 'cal setup'},
+        // {id: 1, url: 'createcardholder', text: 'Luo henkilö'}, // TÄLLÄ VOI LUODA YHDEN HENKIKÖN SUORAAN JÄRJESTELMÄÄN
+        {id: 1, url: 'calendarcreate', text: 'Luo kalenteri'},
+        {id: 2, url: 'calendars', text: 'Kalenterit'},
+        {id: 3, url: 'actadmin', text: 'actadmin'},
+        // {id: 5, url: 'calendarSetup', text: 'cal setup'},
       
 
         // {id: 5, url: '/pricing', text: 'pricing'}

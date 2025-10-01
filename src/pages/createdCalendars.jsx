@@ -1,6 +1,6 @@
-import { Link, redirect, useLoaderData } from "react-router-dom";
+import { Link, redirect, useLoaderData, useRevalidator } from "react-router-dom";
 import { getUser } from "../lib/auth"
-import { listCalendars } from "../lib/api";
+import { deleteCalendar, listCalendars } from "../lib/api";
 
 export async function loader () {
     const auth = getUser();
@@ -10,12 +10,31 @@ export async function loader () {
     const response = await listCalendars(auth.tenantId, auth.token);
 
     const items = Array.isArray(response?.items) ? response.items : Array.isArray(response) ? response : [];
+
+    console.log("items", items);
     return {items};
 }
 
 export default function CreatedCalendar () {
 
     const {items } = useLoaderData() ?? {items: []};
+    const {revalidate} = useRevalidator();
+    const auth = getUser();
+
+    async function handleDelete(idOrSlug) {
+      const ok = window.confirm("Poistetaanko kalenteri? (Toiminto poistaa julkisen linkin)");
+
+      if (!ok) return;
+
+      try {
+        await deleteCalendar(auth.tenantId, idOrSlug, auth.token);
+        revalidate(); // Lataa listan uudelleen
+      } catch (e) {
+        alert(e?.message || "Poisto epäonnistui")
+      }
+    }
+
+
     if (!items.length) {
         return (
           <div className="mx-auto max-w-3xl p-6">
@@ -68,6 +87,13 @@ export default function CreatedCalendar () {
                       onClick={() => navigator.clipboard?.writeText(`${window.location.origin}${publicHref}`)}
                     >
                       Kopioi linkki
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-error"
+                      onClick={() => handleDelete(c.id)}
+                    >
+                      
                     </button>
                   </div>
                 </li>

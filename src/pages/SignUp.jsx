@@ -22,6 +22,7 @@ export const action = async ({request}) => {
     toast.success("Tunnus luotu onnistuneesti");
     return redirect("/signin");
   } catch (error) {
+    console.log("SIGHNUP", error);
     const errorMessage = error?.response?.data?.error?.message || 'Please double check your credentials'
     toast.error(errorMessage);
     return null;
@@ -81,76 +82,6 @@ export default function Signup() {
         <p className="text-center">already a member? <Link to='/signin' className="ml-2 link link-hover link-primary capitalize">login</Link></p>
       </Form>
     </section>
-    // <div style={{ maxWidth: 420, margin: "40px auto" }}>
-    //   <h2>Sign up</h2>
-    //   <form onSubmit={submit}>
-    //     <input
-    //       type="email"
-    //       placeholder="Sähköposti"
-    //       value={form.email}
-    //       onChange={(e) => setForm({ ...form, email: e.target.value })}
-    //       required
-    //       style={{ width: "100%", padding: 8, marginBottom: 10 }}
-    //     />
 
-    //     <input
-    //       type="password"
-    //       placeholder="Salasana (min 6 merkkiä)"
-    //       value={form.password}
-    //       onChange={(e) => setForm({ ...form, password: e.target.value })}
-    //       required
-    //       minLength={6}
-    //       style={{ width: "100%", padding: 8, marginBottom: 10 }}
-    //     />
-
-    //     <fieldset style={{ marginBottom: 12 }}>
-    //       <legend>Rooli</legend>
-    //       <label style={{ marginRight: 12 }}>
-    //         <input
-    //           type="radio"
-    //           name="role"
-    //           value="asiakas"
-    //           checked={form.role === "asiakas"}
-    //           onChange={(e) => setForm({ ...form, role: e.target.value })}
-    //         />{" "}
-    //         Asiakas
-    //       </label>
-    //       <label>
-    //         <input
-    //           type="radio"
-    //           name="role"
-    //           value="asentaja"
-    //           checked={form.role === "asentaja"}
-    //           onChange={(e) => setForm({ ...form, role: e.target.value })}
-    //         />{" "}
-    //         Asentaja
-    //       </label>
-    //     </fieldset>
-
-    //     {form.role === "asiakas" && (
-    //       <div style={{ marginBottom: 12 }}>
-    //         <input
-    //           type="text"
-    //           placeholder="Yrityksen nimi (Tenant name)"
-    //           value={form.tenantName}
-    //           onChange={(e) => setForm({ ...form, tenantName: e.target.value })}
-    //           required
-    //           style={{ width: "100%", padding: 8, marginBottom: 8 }}
-    //         />
-
-    //       </div>
-    //     )}
-
-    //     <button type="submit" disabled={loading} style={{ padding: "8px 14px" }}>
-    //       {loading ? "Luodaan..." : "Luo tili"}
-    //     </button>
-    //   </form>
-
-    //   {err && <p style={{ color: "crimson", marginTop: 10 }}>{err}</p>}
-
-    //   <p style={{ marginTop: 12 }}>
-    //     Onko jo tili? <Link to="/signing">Kirjaudu</Link>
-    //   </p>
-    // </div>
   );
 }
