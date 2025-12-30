@@ -23,7 +23,7 @@ You will need:
 - Login credentials
 - Ask the system provider / administrator for these details.
 
-<img src="./assets/2.jpg" width="250" />
+<img src="./act-calendar/src/assets/2.jpg" width="250" />
 <img src="./assets/3.jpg" width="250" />
 
 ### Create a Calendar
