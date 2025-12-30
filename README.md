@@ -43,7 +43,10 @@ After the calendar is created, the customer can access it through a shareable li
 
 ### Booking Appears in ACT365
 The reservation will be visible in the ACT365 system.
-<img src="src/assets/7.jpg" width="250" />
+<img src="src/assets/7.png" width="250" />
+
+
+---
 
 
 
