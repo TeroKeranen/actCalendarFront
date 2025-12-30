@@ -12,7 +12,7 @@ A customer can then reserve a time slot, and after booking they receive an email
 
 ### Create an Account
 First, create user credentials on the site.
-<img src="src/assets/1.jpg" width="250" />
+<img src="src/assets/1.png" width="250" />
 
 ### Link an ACT365 Customer Account
 After creating credentials and logging in, you must link an ACT365 customer account.
@@ -23,23 +23,23 @@ You will need:
 - Login credentials
 - Ask the system provider / administrator for these details.
 
-<img src="src/assets/2.jpg" width="250" />
-<img src="src/assets/3.jpg" width="250" />
+<img src="src/assets/2.png" width="250" />
+<img src="src/assets/3.png" width="250" />
 
 ### Create a Calendar
 You can create a calendar from the page "Luo kalenteri".
 
-<img src="src/assets/4.jpg" width="250" />
+<img src="src/assets/4.png" width="250" />
 
 ### Fill Calendar Details
 Enter the calendar information as you want.
 
-<img src="src/assets/5.jpg" width="250" />
+<img src="src/assets/5.png" width="250" />
 
 ### Customer Books a Time Slot via Link
 
 After the calendar is created, the customer can access it through a shareable link and make a reservation.
-<img src="src/assets/6.jpg" width="250" />
+<img src="src/assets/6.png" width="250" />
 
 ### Booking Appears in ACT365
 The reservation will be visible in the ACT365 system.
